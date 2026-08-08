@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Hull 44 Fire Watch</title>
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                   Roboto, Arial, sans-serif;
+      background: #07131f;
+      color: white;
+    }
+
+    header {
+      background: #0b2239;
+      padding: 16px 18px;
+      text-align: center;
+      border-bottom: 1px solid #27445f;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 26px;
+    }
+
+    .subtitle {
+      margin-top: 5px;
+      color: #b7c8d8;
+      font-size: 14px;
+    }
+
+    .status {
+      background: #12304a;
+      padding: 12px 15px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .green {
+      color: #54e38e;
+    }
+
+    #map {
+      width: 100%;
+      height: 62vh;
+      min-height: 430px;
+    }
+
+    .panel {
+      padding: 18px;
+      background: #0b2239;
+    }
+
+    .card {
+      background: #12304a;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .card h2 {
+      margin: 0 0 8px 0;
+      font-size: 19px;
+    }
+
+    .card p {
+      margin: 6px 0;
+      color: #d6e1eb;
+      line-height: 1.45;
+    }
+
+    .button {
+      display: block;
+      width: 100%;
+      background: #e95b3f;
+      color: white;
+      text-decoration: none;
+      text-align: center;
+      font-weight: 700;
+      padding: 14px;
+      margin-top: 12px;
+      border-radius: 10px;
+    }
+
+    .button.secondary {
+      background: #24628f;
+    }
+
+    .legend {
+      background: white;
+      color: #222;
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    footer {
+      padding: 18px;
+      text-align: center;
+      color: #8ea5b9;
+      font-size: 12px;
+      background: #07131f;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>🔥 Hull 44 Fire Watch</h1>
+  <div class="subtitle">
+    Bali 5.8 • Canet-en-Roussillon, France
+  </div>
+</header>
+
+<div class="status">
+  <span class="green">● MONITORING ACTIVE</span>
+  &nbsp; | &nbsp; Catana / Bali Factory
+</div>
+
+<div id="map"></div>
+
+<div class="panel">
+
+  <div class="card">
+    <h2>⛵ Hull 44</h2>
+    <p>
+      Monitoring wildfire activity surrounding the Catana / Bali
+      production facility in Canet-en-Roussillon, southern France.
+    </p>
+    <p>
+      <strong>Boat:</strong> Bali 5.8 — Hull 44
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>🔥 Live Fire Intelligence</h2>
+    <p>
+      NASA FIRMS uses satellite observations from MODIS and VIIRS
+      instruments to detect thermal anomalies and active fires.
+    </p>
+
+    <a class="button"
+       href="https://firms.modaps.eosdis.nasa.gov/map/"
+       target="_blank">
+       Open NASA Live Fire Map
+    </a>
+  </div>
+
+  <div class="card">
+    <h2>🚨 Emergency Information</h2>
+    <p>
+      This dashboard is for situational awareness only. Satellite
+      detections can be delayed and should not replace official
+      French emergency instructions.
+    </p>
+
+    <a class="button secondary"
+       href="https://www.pompiers.fr/"
+       target="_blank">
+       French Fire & Rescue Information
+    </a>
+  </div>
+
+</div>
+
+<footer>
+  Hull 44 Fire Watch • Southern France<br>
+  Satellite fire monitoring powered by NASA FIRMS
+</footer>
+
+
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
+<script>
+
+  /*
+    Approximate Catana / Bali factory area
+    Canet-en-Roussillon, France
+  */
+
+  const factoryLat = 42.69;
+  const factoryLon = 3.03;
+
+  const map = L.map('map').setView(
+    [factoryLat, factoryLon],
+    9
+  );
+
+  L.tileLayer(
+    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }
+  ).addTo(map);
+
+
+  /*
+    Hull 44 / Factory marker
+  */
+
+  const boatIcon = L.divIcon({
+    html: '<div style="font-size:32px;">⛵</div>',
+    className: '',
+    iconSize: [36,36],
+    iconAnchor: [18,18]
+  });
+
+  L.marker(
+    [factoryLat, factoryLon],
+    { icon: boatIcon }
+  )
+  .addTo(map)
+  .bindPopup(
+    '<b>Hull 44</b><br>' +
+    'Bali 5.8<br>' +
+    'Catana / Bali Factory Area<br>' +
+    'Canet-en-Roussillon, France'
+  )
+  .openPopup();
+
+
+  /*
+    Monitoring rings
+  */
+
+  L.circle(
+    [factoryLat, factoryLon],
+    {
+      radius: 10000,
+      color: '#d22',
+      fillOpacity: 0.03,
+      weight: 2
+    }
+  )
+  .addTo(map)
+  .bindTooltip('10 km monitoring zone');
+
+
+  L.circle(
+    [factoryLat, factoryLon],
+    {
+      radius: 25000,
+      color: '#e68a00',
+      fillOpacity: 0.02,
+      weight: 2
+    }
+  )
+  .addTo(map)
+  .bindTooltip('25 km monitoring zone');
+
+
+  L.circle(
+    [factoryLat, factoryLon],
+    {
+      radius: 50000,
+      color: '#e0b000',
+      fillOpacity: 0.01,
+      weight: 2
+    }
+  )
+  .addTo(map)
+  .bindTooltip('50 km monitoring zone');
+
+
+  /*
+    Legend
+  */
+
+  const legend = L.control({
+    position: 'bottomright'
+  });
+
+  legend.onAdd = function () {
+
+    const div = L.DomUtil.create(
+      'div',
+      'legend'
+    );
+
+    div.innerHTML =
+      '<strong>Hull 44 Watch Zones</strong><br>' +
+      '🔴 10 km — Immediate<br>' +
+      '🟠 25 km — Close watch<br>' +
+      '🟡 50 km — Regional';
+
+    return div;
+  };
+
+  legend.addTo(map);
+
+</script>
+
+</body>
+</html>
