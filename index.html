@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <title>Hull 44 Fire Watch</title>
-<link rel="apple-touch-icon" sizes="180x180" href="./icon.png?v=4">
-<link rel="icon" type="image/png" href="./icon.png?v=4">
 
   <link
     rel="stylesheet"
@@ -18,295 +16,633 @@
       box-sizing: border-box;
     }
 
-    body {
+    html, body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-                   Roboto, Arial, sans-serif;
-      background: #07131f;
+      padding: 0;
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #07111f;
       color: white;
+    }
+
+    #app {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
 
     header {
-      background: #0b2239;
-      padding: 16px 18px;
-      text-align: center;
-      border-bottom: 1px solid #27445f;
+      padding: 14px 16px 10px;
+      background: #07111f;
+      z-index: 1000;
     }
 
-    h1 {
-      margin: 0;
-      font-size: 26px;
+    .title {
+      font-size: 25px;
+      font-weight: 800;
     }
 
     .subtitle {
-      margin-top: 5px;
-      color: #b7c8d8;
+      margin-top: 3px;
+      font-size: 13px;
+      color: #a9bad1;
+    }
+
+    #statusCard {
+      margin-top: 12px;
+      padding: 13px 14px;
+      border-radius: 14px;
+      background: #122033;
+      border: 1px solid #253b55;
+    }
+
+    #statusLine {
+      font-size: 19px;
+      font-weight: 750;
+    }
+
+    #nearest {
+      margin-top: 4px;
       font-size: 14px;
+      color: #cad6e5;
     }
 
-    .status {
-      background: #12304a;
-      padding: 12px 15px;
-      text-align: center;
-      font-weight: 600;
-    }
-
-    .green {
-      color: #54e38e;
+    #updated {
+      margin-top: 3px;
+      font-size: 12px;
+      color: #8196af;
     }
 
     #map {
-      width: 100%;
-      height: 62vh;
-      min-height: 430px;
-    }
-
-    .panel {
-      padding: 18px;
-      background: #0b2239;
-    }
-
-    .card {
-      background: #12304a;
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 12px;
-    }
-
-    .card h2 {
-      margin: 0 0 8px 0;
-      font-size: 19px;
-    }
-
-    .card p {
-      margin: 6px 0;
-      color: #d6e1eb;
-      line-height: 1.45;
-    }
-
-    .button {
-      display: block;
-      width: 100%;
-      background: #e95b3f;
-      color: white;
-      text-decoration: none;
-      text-align: center;
-      font-weight: 700;
-      padding: 14px;
-      margin-top: 12px;
-      border-radius: 10px;
-    }
-
-    .button.secondary {
-      background: #24628f;
-    }
-
-    .legend {
-      background: white;
-      color: #222;
-      padding: 8px 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      line-height: 1.5;
+      flex: 1;
+      min-height: 350px;
     }
 
     footer {
-      padding: 18px;
+      padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+      background: #07111f;
+    }
+
+    button {
+      width: 100%;
+      border: 0;
+      border-radius: 13px;
+      padding: 14px;
+      font-size: 17px;
+      font-weight: 700;
+      background: white;
+      color: #07111f;
+    }
+
+    button:disabled {
+      opacity: 0.55;
+    }
+
+    .legend {
+      margin-top: 8px;
+      font-size: 11px;
+      color: #91a5bd;
       text-align: center;
-      color: #8ea5b9;
-      font-size: 12px;
-      background: #07131f;
+    }
+
+    .factory-marker {
+      background: #1677ff;
+      border: 3px solid white;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(0,0,0,.5);
+    }
+
+    .fire-marker {
+      font-size: 24px;
+      line-height: 24px;
+      filter: drop-shadow(0 2px 3px rgba(0,0,0,.7));
     }
   </style>
 </head>
 
 <body>
 
-<header>
-  <h1>🔥 Hull 44 Fire Watch</h1>
-  <div class="subtitle">
-    Bali 5.8 • Canet-en-Roussillon, France
-  </div>
-</header>
+<div id="app">
 
-<div class="status">
-  <span class="green">● MONITORING ACTIVE</span>
-  &nbsp; | &nbsp; Catana / Bali Factory
-</div>
+  <header>
+    <div class="title">🔥 Hull 44 Fire Watch</div>
+    <div class="subtitle">
+      Bali 5.8 • Canet-en-Roussillon, France
+    </div>
 
-<div id="map"></div>
+    <div id="statusCard">
+      <div id="statusLine">Connecting to NASA FIRMS…</div>
+      <div id="nearest">Checking for recent satellite fire detections.</div>
+      <div id="updated"></div>
+    </div>
+  </header>
 
-<div class="panel">
+  <div id="map"></div>
 
-  <div class="card">
-    <h2>⛵ Hull 44</h2>
-    <p>
-      Monitoring wildfire activity surrounding the Catana / Bali
-      production facility in Canet-en-Roussillon, southern France.
-    </p>
-    <p>
-      <strong>Boat:</strong> Bali 5.8 — Hull 44
-    </p>
-  </div>
+  <footer>
+    <button id="refreshButton" onclick="loadFires()">
+      Refresh NASA Fire Data
+    </button>
 
-  <div class="card">
-    <h2>🔥 Live Fire Intelligence</h2>
-    <p>
-      NASA FIRMS uses satellite observations from MODIS and VIIRS
-      instruments to detect thermal anomalies and active fires.
-    </p>
-
-    <a class="button"
-       href="https://firms.modaps.eosdis.nasa.gov/map/"
-       target="_blank">
-       Open NASA Live Fire Map
-    </a>
-  </div>
-
-  <div class="card">
-    <h2>🚨 Emergency Information</h2>
-    <p>
-      This dashboard is for situational awareness only. Satellite
-      detections can be delayed and should not replace official
-      French emergency instructions.
-    </p>
-
-    <a class="button secondary"
-       href="https://www.pompiers.fr/"
-       target="_blank">
-       French Fire & Rescue Information
-    </a>
-  </div>
+    <div class="legend">
+      NASA FIRMS satellite thermal detections • VIIRS NOAA-20 + NOAA-21
+    </div>
+  </footer>
 
 </div>
 
-<footer>
-  Hull 44 Fire Watch • Southern France<br>
-  Satellite fire monitoring powered by NASA FIRMS
-</footer>
-
-
-<script
-  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 
   /*
-    Approximate Catana / Bali factory area
-    Canet-en-Roussillon, France
+  ============================================================
+  NASA FIRMS KEY
+
+  Paste your NASA FIRMS MAP_KEY between the quotation marks.
+  Do not remove the quotation marks.
+  ============================================================
   */
 
-  const factoryLat = 42.69;
-  const factoryLon = 3.03;
+  const FIRMS_MAP_KEY = "PASTE_YOUR_NASA_KEY_HERE";
 
-  const map = L.map('map').setView(
-    [factoryLat, factoryLon],
-    9
+
+  /*
+  ============================================================
+  CATANA / BALI SHIPYARD
+
+  Approximate monitoring point:
+  Zone Technique du Port
+  Canet-en-Roussillon, France
+
+  We can fine-tune this later to the exact Hull 44 building.
+  ============================================================
+  */
+
+  const FACTORY_LAT = 42.696;
+  const FACTORY_LON = 3.035;
+
+
+  // Monitor roughly 100 km around the shipyard.
+  const BOX = {
+    west: 1.8,
+    south: 41.8,
+    east: 4.2,
+    north: 43.6
+  };
+
+
+  const map = L.map("map").setView(
+    [FACTORY_LAT, FACTORY_LON],
+    8
   );
 
+
   L.tileLayer(
-    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
     {
       maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors'
+      attribution: "© OpenStreetMap"
     }
   ).addTo(map);
 
 
-  /*
-    Hull 44 / Factory marker
-  */
-
-  const boatIcon = L.divIcon({
-    html: '<div style="font-size:32px;">⛵</div>',
-    className: '',
-    iconSize: [36,36],
-    iconAnchor: [18,18]
+  const factoryIcon = L.divIcon({
+    className: "",
+    html: '<div class="factory-marker"></div>',
+    iconSize: [20,20],
+    iconAnchor: [10,10]
   });
 
+
   L.marker(
-    [factoryLat, factoryLon],
-    { icon: boatIcon }
+    [FACTORY_LAT, FACTORY_LON],
+    { icon: factoryIcon }
   )
   .addTo(map)
   .bindPopup(
-    '<b>Hull 44</b><br>' +
-    'Bali 5.8<br>' +
-    'Catana / Bali Factory Area<br>' +
-    'Canet-en-Roussillon, France'
+    "<b>Hull 44 / Bali Shipyard</b><br>Canet-en-Roussillon, France"
+  );
+
+
+  L.circle(
+    [FACTORY_LAT, FACTORY_LON],
+    {
+      radius: 16093,
+      color: "#ff3b30",
+      fillOpacity: 0.02
+    }
   )
-  .openPopup();
+  .addTo(map)
+  .bindTooltip("10 mile danger zone");
+
+
+  L.circle(
+    [FACTORY_LAT, FACTORY_LON],
+    {
+      radius: 40234,
+      color: "#ff9500",
+      fillOpacity: 0.015
+    }
+  )
+  .addTo(map)
+  .bindTooltip("25 mile watch zone");
+
+
+  const fireLayer = L.layerGroup().addTo(map);
+
+
+  function milesBetween(lat1, lon1, lat2, lon2) {
+
+    const R = 3958.8;
+
+    const toRad = x => x * Math.PI / 180;
+
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) ** 2;
+
+    const c =
+      2 *
+      Math.atan2(
+        Math.sqrt(a),
+        Math.sqrt(1 - a)
+      );
+
+    return R * c;
+  }
+
+
+  function parseCSV(text) {
+
+    const lines =
+      text.trim()
+      .split(/\r?\n/);
+
+    if (lines.length < 2) {
+      return [];
+    }
+
+    const headers =
+      lines[0]
+      .split(",")
+      .map(x => x.trim());
+
+
+    return lines.slice(1).map(line => {
+
+      const values = line.split(",");
+
+      const row = {};
+
+      headers.forEach((header, index) => {
+        row[header] =
+          values[index]
+          ? values[index].replace(/^"|"$/g,"").trim()
+          : "";
+      });
+
+      return row;
+
+    });
+
+  }
+
+
+  async function getSensorData(sensor) {
+
+    const coords =
+      `${BOX.west},${BOX.south},${BOX.east},${BOX.north}`;
+
+    const url =
+      `https://firms.modaps.eosdis.nasa.gov/api/area/csv/` +
+      `${FIRMS_MAP_KEY}/${sensor}/${coords}/1`;
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(
+        `NASA returned ${response.status}`
+      );
+    }
+
+    const text = await response.text();
+
+    return parseCSV(text);
+  }
+
+
+  async function loadFires() {
+
+    const button =
+      document.getElementById("refreshButton");
+
+    const status =
+      document.getElementById("statusLine");
+
+    const nearestText =
+      document.getElementById("nearest");
+
+    const updated =
+      document.getElementById("updated");
+
+
+    if (
+      FIRMS_MAP_KEY ===
+      "l1O9mbnzMqklspIjdKqHhHQ7LdFUhatrJFQwxXWe"
+    ) {
+
+      status.innerHTML =
+        "⚠️ NASA key needed";
+
+      nearestText.innerHTML =
+        "Paste your FIRMS MAP_KEY into the code first.";
+
+      return;
+    }
+
+
+    button.disabled = true;
+
+    button.innerText =
+      "Checking NASA satellites…";
+
+    status.innerHTML =
+      "🛰️ Checking NASA FIRMS…";
+
+    nearestText.innerHTML =
+      "Downloading the latest detections.";
+
+    fireLayer.clearLayers();
+
+
+    try {
+
+      /*
+      Query BOTH currently useful VIIRS feeds.
+      */
+
+      const results =
+        await Promise.allSettled([
+
+          getSensorData(
+            "VIIRS_NOAA20_NRT"
+          ),
+
+          getSensorData(
+            "VIIRS_NOAA21_NRT"
+          )
+
+        ]);
+
+
+      let fires = [];
+
+
+      results.forEach(result => {
+
+        if (result.status === "fulfilled") {
+          fires =
+            fires.concat(result.value);
+        }
+
+      });
+
+
+      /*
+      Remove duplicate detections.
+      */
+
+      const unique = new Map();
+
+      fires.forEach(fire => {
+
+        const key =
+          `${fire.latitude}-` +
+          `${fire.longitude}-` +
+          `${fire.acq_date}-` +
+          `${fire.acq_time}`;
+
+        unique.set(key, fire);
+
+      });
+
+      fires =
+        Array.from(unique.values());
+
+
+      const processed = [];
+
+
+      fires.forEach(fire => {
+
+        const lat =
+          parseFloat(fire.latitude);
+
+        const lon =
+          parseFloat(fire.longitude);
+
+        if (
+          !Number.isFinite(lat) ||
+          !Number.isFinite(lon)
+        ) {
+          return;
+        }
+
+
+        const distance =
+          milesBetween(
+            FACTORY_LAT,
+            FACTORY_LON,
+            lat,
+            lon
+          );
+
+
+        fire.distance = distance;
+
+        processed.push(fire);
+
+
+        let emoji = "🔥";
+
+        if (distance <= 10) {
+          emoji = "🚨";
+        }
+        else if (distance <= 25) {
+          emoji = "🔥";
+        }
+        else {
+          emoji = "🟠";
+        }
+
+
+        const icon =
+          L.divIcon({
+            className: "",
+            html:
+              `<div class="fire-marker">${emoji}</div>`,
+            iconSize: [28,28],
+            iconAnchor: [14,14]
+          });
+
+
+        const confidence =
+          fire.confidence || "—";
+
+        const satellite =
+          fire.satellite || "VIIRS";
+
+        const brightness =
+          fire.bright_ti4 ||
+          fire.brightness ||
+          "—";
+
+
+        L.marker(
+          [lat, lon],
+          { icon }
+        )
+        .addTo(fireLayer)
+        .bindPopup(
+
+          `<b>NASA Fire / Thermal Detection</b><br>` +
+
+          `Distance from Hull 44: ` +
+          `<b>${distance.toFixed(1)} miles</b><br>` +
+
+          `Detected: ` +
+          `${fire.acq_date || ""} ` +
+          `${fire.acq_time || ""} UTC<br>` +
+
+          `Satellite: ${satellite}<br>` +
+
+          `Confidence: ${confidence}<br>` +
+
+          `Brightness: ${brightness}`
+
+        );
+
+      });
+
+
+      processed.sort(
+        (a,b) =>
+          a.distance - b.distance
+      );
+
+
+      if (processed.length === 0) {
+
+        status.innerHTML =
+          "✅ No recent NASA detections";
+
+        nearestText.innerHTML =
+          "No VIIRS fire/thermal hotspots were found in the monitored area.";
+
+      }
+
+      else {
+
+        const nearest =
+          processed[0];
+
+        const d =
+          nearest.distance;
+
+
+        if (d <= 10) {
+
+          status.innerHTML =
+            "🚨 DANGER — FIRE VERY CLOSE";
+
+        }
+
+        else if (d <= 25) {
+
+          status.innerHTML =
+            "⚠️ FIRE WATCH";
+
+        }
+
+        else {
+
+          status.innerHTML =
+            "✅ No nearby fire threat";
+
+        }
+
+
+        nearestText.innerHTML =
+
+          `Nearest NASA detection: ` +
+          `<strong>${d.toFixed(1)} miles</strong>` +
+
+          `<br>` +
+
+          `${processed.length} satellite detection` +
+
+          `${processed.length === 1 ? "" : "s"} ` +
+
+          `in monitored region.`;
+
+      }
+
+
+      updated.innerHTML =
+        "Last checked: " +
+        new Date()
+        .toLocaleString();
+
+
+    }
+
+    catch(error) {
+
+      console.error(error);
+
+      status.innerHTML =
+        "⚠️ NASA connection problem";
+
+      nearestText.innerHTML =
+        "Fire data could not be downloaded. Tap Refresh to try again.";
+
+    }
+
+    finally {
+
+      button.disabled = false;
+
+      button.innerText =
+        "Refresh NASA Fire Data";
+
+    }
+
+  }
 
 
   /*
-    Monitoring rings
+  Automatically check NASA when app opens.
   */
 
-  L.circle(
-    [factoryLat, factoryLon],
-    {
-      radius: 10000,
-      color: '#d22',
-      fillOpacity: 0.03,
-      weight: 2
-    }
-  )
-  .addTo(map)
-  .bindTooltip('10 km monitoring zone');
-
-
-  L.circle(
-    [factoryLat, factoryLon],
-    {
-      radius: 25000,
-      color: '#e68a00',
-      fillOpacity: 0.02,
-      weight: 2
-    }
-  )
-  .addTo(map)
-  .bindTooltip('25 km monitoring zone');
-
-
-  L.circle(
-    [factoryLat, factoryLon],
-    {
-      radius: 50000,
-      color: '#e0b000',
-      fillOpacity: 0.01,
-      weight: 2
-    }
-  )
-  .addTo(map)
-  .bindTooltip('50 km monitoring zone');
+  loadFires();
 
 
   /*
-    Legend
+  Refresh every 15 minutes while the app remains open.
   */
 
-  const legend = L.control({
-    position: 'bottomright'
-  });
-
-  legend.onAdd = function () {
-
-    const div = L.DomUtil.create(
-      'div',
-      'legend'
-    );
-
-    div.innerHTML =
-      '<strong>Hull 44 Watch Zones</strong><br>' +
-      '🔴 10 km — Immediate<br>' +
-      '🟠 25 km — Close watch<br>' +
-      '🟡 50 km — Regional';
-
-    return div;
-  };
-
-  legend.addTo(map);
+  setInterval(
+    loadFires,
+    15 * 60 * 1000
+  );
 
 </script>
 
